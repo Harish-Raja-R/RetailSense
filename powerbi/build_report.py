@@ -20,7 +20,7 @@ def schema(kind, version='1.0.0'):
     return SCHEMA + kind + '/' + version + '/schema.json'
 
 
-def build(data, dest):
+def build(data, dest, risk=None):
     if dest.exists() and any(dest.iterdir()):
         raise FileExistsError(f'Choose an empty report destination with --dest: {dest}')
     report = dest/'RetailSense.Report'
@@ -40,7 +40,16 @@ def build(data, dest):
                            f'CALCULATE(SUM(FactOrder[{col}]), FactOrder[day_key] = 1942))')
     strings = set('item_id store_id state_id model scenario split cat_id dept_id policy'.split())
     decimals = set('sell_price forecast error abs_error mean_daily'.split())
-    for path in sorted(data.glob('*.csv')):
+    paths = sorted(data.glob('*.csv'))
+    if risk is not None:
+        if risk.name != 'FactRisk.csv':
+            raise ValueError('Expected the planner risk export FactRisk.csv')
+        paths.append(risk)
+        strings.add('risk_model')
+        measures['Exposure units'] = 'IF(HASONEVALUE(DimScenario[scenario]), SUM(FactRisk[exposure_units]))'
+        measures['P90 item demand'] = ('IF(HASONEVALUE(DimScenario[scenario]) && HASONEVALUE(DimStore[store_id]) '
+                                       '&& HASONEVALUE(DimProduct[item_id]), MAX(FactRisk[p90_units]))')
+    for path in paths:
         name = path.stem
         with path.open(encoding='utf-8-sig') as handle:
             columns[name] = next(csv.reader(handle))
@@ -70,7 +79,7 @@ def build(data, dest):
                 '0.00%' if k in ('WAPE','Holdout WAPE','Simulated Fill Rate') else '#,0.###'))
                 for k,v in measures.items()]
         tables.append(table)
-    if len(tables)!=9:
+    if len(tables) != (10 if risk is not None else 9):
         raise ValueError('Expected nine Phase 5 CSV tables')
     write(model/'model.bim',dict(name='RetailSense',compatibilityLevel=1600,
           model=dict(culture='en-US',defaultPowerBIDataSourceVersion='powerBI_V3',
@@ -110,6 +119,14 @@ def build(data, dest):
             ('Day 1942 · largest suggested orders first', 'tableEx', {'Values':['DimScenario.scenario','DimStore.store_id','DimProduct.item_id','Target stock','Stock on hand','Inbound stock','Next order units']}, (24,238,1232,450)),
         ],
     }
+    if risk is not None:
+        queue = pages['Replenishment Queue']
+        queue[2] = ('Estimated uncovered units · choose one scenario', 'card',
+                    {'Values':['Exposure units']}, (881,20,375,202))
+        queue[-1] = ('Risk review · largest estimated shortfalls first', 'tableEx',
+                     {'Values':['DimScenario.scenario','DimStore.store_id','DimProduct.item_id',
+                                'P90 item demand','Stock on hand','Inbound stock','Next order units',
+                                'Exposure units']}, (24,238,1232,450))
     order = []
     for title, visuals in pages.items():
         page = hashlib.sha256(title.encode()).hexdigest()[:20]
@@ -157,5 +174,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--data',type=Path,default=Path('outputs/powerbi'))
     parser.add_argument('--dest',type=Path,default=Path('outputs/desktop'))
+    parser.add_argument('--risk', type=Path, help='Optional path to FactRisk.csv')
     args = parser.parse_args()
-    build(args.data,args.dest)
+    build(args.data,args.dest,args.risk)
+
