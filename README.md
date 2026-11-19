@@ -4,7 +4,7 @@ Retail demand forecasting, inventory intelligence and replenishment analysis.
 
 ## Current milestone
 
-Real M5 cohort preparation and the 28-day backtest are complete. See [cohort preparation](PHASE2.md). Inventory simulation is complete. Power BI modelling is the next milestone.
+The Phase 5 dimensional export has been reproduced. Phase 6 has a generated four-page Power BI Desktop project. See [cohort preparation](PHASE2.md) and the [report build and verification guide](powerbi/PHASE6.md).
 
 ## Reproduce the forecast comparison
 
