@@ -4,7 +4,7 @@ Retail demand forecasting, inventory intelligence and replenishment analysis.
 
 ## Current milestone
 
-The Phase 5 dimensional export has been reproduced. Phase 6 has a generated four-page Power BI Desktop project. See [cohort preparation](PHASE2.md) and the [report build and verification guide](powerbi/PHASE6.md).
+Harish verified all four pages in Power BI Desktop. Phase 7 reproduced the pipeline and report project from the pinned GitHub source. Start with the [three-minute interview walkthrough and clean setup](PHASE7.md). See [cohort preparation](PHASE2.md) and the [Desktop verification guide](powerbi/PHASE6.md).
 
 ## Reproduce the forecast comparison
 
@@ -29,7 +29,7 @@ Local exports include daily predictions and results by volume band, horizon and 
 
 ## Inventory simulation
 
-Run `python inventory.py` after the forecast comparison. Outputs are written to `outputs/inventory`. The simulator treats historical sales as a demand proxy. Each series starts on day 1886 with 14 days of assumed stock at its trailing sales rate and zero inbound units. A 28-day warm-up precedes the scored replay on days 1914?1941. Receipts arrive before the weekly review. Orders use sales observed through the previous day. Unfilled units are lost. Lead times are constant, deliveries arrive in full, and orders are rounded up to whole units.
+Run `python inventory.py` after the forecast comparison. Outputs are written to `outputs/inventory`. The simulator treats historical sales as a demand proxy. Each series starts on day 1886 with 14 days of assumed stock at its trailing sales rate and zero inbound units. A 28-day warm-up precedes the scored replay on days 1914 through 1941. Receipts arrive before the weekly review. Orders use sales observed through the previous day. Unfilled units are lost. Lead times are constant, deliveries arrive in full, and orders are rounded up to whole units.
 
 The fixed policy targets 14 days of cover. The forecast policy targets the seven-day review interval plus supplier lead time, with zero or three additional days of buffer. Both subtract on-hand and outstanding units. At seven-day lead time, the unbuffered policies are mathematically identical. Scenario cost is expressed in illustrative points: 0.02 per closing-stock unit per day plus 1 per lost unit. Holding costs, supplier constraints and unavailable demand during historical stockouts are uncertain.
 
