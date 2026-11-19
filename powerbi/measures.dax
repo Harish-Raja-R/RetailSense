@@ -1,0 +1,20 @@
+// Create each named measure separately in Power BI Desktop.
+Units Sold = SUM(FactSales[units])
+
+Forecast Units = IF(HASONEVALUE(DimModel[model]), SUM(FactForecast[forecast]))
+
+WAPE = IF(HASONEVALUE(DimModel[model]), DIVIDE(SUM(FactForecast[abs_error]), SUM(FactForecast[actual])))
+
+MAE = IF(HASONEVALUE(DimModel[model]), AVERAGE(FactForecast[abs_error]))
+
+Bias Units Per Item Day = IF(HASONEVALUE(DimModel[model]), AVERAGE(FactForecast[error]))
+
+Simulated Fill Rate = IF(HASONEVALUE(DimScenario[scenario]), DIVIDE(SUM(FactInventory[fulfilled]), SUM(FactInventory[demand])))
+
+Simulated Lost Units = IF(HASONEVALUE(DimScenario[scenario]), SUM(FactInventory[lost]))
+
+Average Daily Closing Stock = IF(HASONEVALUE(DimScenario[scenario]), AVERAGEX(VALUES(FactInventory[day_key]), CALCULATE(SUM(FactInventory[closing]))))
+
+Assumed Cost Points = IF(HASONEVALUE(DimScenario[scenario]), SUM(FactInventory[closing]) * 0.02 + SUM(FactInventory[lost]))
+
+Suggested Order Units = IF(HASONEVALUE(DimScenario[scenario]) && HASONEVALUE(FactOrder[day_key]), SUM(FactOrder[suggested_units]))
