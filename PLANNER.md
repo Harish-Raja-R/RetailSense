@@ -25,4 +25,17 @@ python planner_agent.py --model YOUR_LOCAL_MODEL "Which five orders have the mos
 
 The model can request ranked order evidence or holdout calibration results and follow up using those results. The program prints the tool arguments and exact rows alongside generated text for verification. The agent reads two fixed CSV exports and has no purchasing tools. A follow-up question to practise is “How often did observed demand fall below the selected upper estimate on the holdout for each lead time?”
 
-The automated fixture checks the model comparison, a known exposure calculation and the agent loop with scripted model replies. Actual M5 performance, live agent responses and the revised screen require a local acceptance run.
+The automated fixture checks the model comparison, a known exposure calculation and the agent loop with scripted model replies. The real-data pilot below verifies model performance and the evidence lookup. Live language-model responses and the revised Desktop screen still require acceptance checks.
+
+## M5 pilot results
+
+The 120 item-store series were evaluated at origin 1913. The three preceding validation origins selected the boosted quantile model at both horizons. Pinball loss scores the 90th-percentile estimate and weights underestimates more heavily. Lower is better. Coverage is the fraction of series whose observed total fell at or below the forecast bound.
+
+| Horizon | Baseline holdout loss | Boosted holdout loss | Baseline coverage | Boosted coverage |
+|---|---:|---:|---:|---:|
+| 14 days | 2.564 | 2.303 | 82.50% | 86.67% |
+| 21 days | 4.642 | 4.293 | 78.33% | 85.83% |
+
+Both selected bounds fell short of the nominal 90% coverage on this single holdout. The pilot reconciled all 720 scenario rows. In TX_1 under forecast_cover_L7_B3, the highest-ranked item FOODS_3_444 had 284 units of estimated upper demand against 99 simulated on hand, zero inbound and 135 suggested. Its 50 uncovered units flag it for review. This quantity is conditional on the scenario assumptions.
+
+All ten automated tests passed on the Windows project runtime. The risk report was generated locally. The order evidence above came from the agent's read-only lookup function. Live language generation and rendering of this revised report are pending.
