@@ -4,10 +4,28 @@ Retail demand forecasting, inventory intelligence and replenishment analysis.
 
 ## Current milestone
 
-The ingestion foundation is implemented. It generates an explicitly synthetic fixture,
-validates M5-shaped CSV inputs, transforms wide daily sales into a daily SQL fact table,
-and exports a source manifest with SHA-256 hashes. Forecasting, inventory simulation
-and the Power BI report are planned next. There are no measured M5 results yet.
+Real M5 cohort preparation and the 28-day backtest are complete. See [cohort preparation](PHASE2.md). Inventory simulation and Power BI are the next milestones.
+
+## Reproduce the forecast comparison
+
+After setup, run these commands in the project directory. Use a fresh output directory for each run.
+
+```powershell
+.\.venv\Scripts\python.exe prepare_m5.py --raw data/raw/m5 --output outputs/m5-cohort
+.\.venv\Scripts\python.exe forecast.py --cohort outputs/m5-cohort --output outputs/forecast
+```
+
+The 120 item-store series come from CA_1 and TX_1. At each origin the weekly naive model repeats the last seven observations and the trailing mean repeats the last 28-day average. The pooled Poisson model learns from completed 28-day windows using recent sales levels, the target weekday's historical average and the forecast horizon. Its regularization strength was fixed at 0.01. All three receive history ending on the origin day.
+
+| Model | Pooled validation WAPE | Holdout WAPE | Holdout MAE |
+|---|---:|---:|---:|
+| Trailing 28-day mean | 84.74% | 94.77% | 1.065 |
+| Poisson regression | 86.94% | 95.29% | 1.071 |
+| Weekly seasonal naive | 98.16% | 106.30% | 1.195 |
+
+Three validation windows selected the trailing mean before evaluation on days 1914 through 1941. Across 3,360 held-out daily observations, recorded sales totalled 3,777 units and the selected forecast totalled 3,388 units. Errors in opposite directions cancel in that net difference of 389 units. WAPE instead sums absolute errors before dividing by total observed sales. These results describe one cohort and one holdout window.
+
+Local exports include daily predictions and results by volume band, horizon and origin. Bias is forecast minus actual, averaged over item-store days. WAPE is blank for groups with zero actual sales. Test coverage includes a future-sales perturbation and an exact weekly-baseline alignment check.
 
 ## Setup on Windows
 
