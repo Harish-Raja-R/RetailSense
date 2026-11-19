@@ -4,7 +4,7 @@ Retail demand forecasting, inventory intelligence and replenishment analysis.
 
 ## Current milestone
 
-Real M5 cohort preparation and the 28-day backtest are complete. See [cohort preparation](PHASE2.md). Inventory simulation and Power BI are the next milestones.
+Real M5 cohort preparation and the 28-day backtest are complete. See [cohort preparation](PHASE2.md). Inventory simulation is complete. Power BI modelling is the next milestone.
 
 ## Reproduce the forecast comparison
 
@@ -26,6 +26,22 @@ The 120 item-store series come from CA_1 and TX_1. At each origin the weekly nai
 Three validation windows selected the trailing mean before evaluation on days 1914 through 1941. Across 3,360 held-out daily observations, recorded sales totalled 3,777 units and the selected forecast totalled 3,388 units. Errors in opposite directions cancel in that net difference of 389 units. WAPE instead sums absolute errors before dividing by total observed sales. These results describe one cohort and one holdout window.
 
 Local exports include daily predictions and results by volume band, horizon and origin. Bias is forecast minus actual, averaged over item-store days. WAPE is blank for groups with zero actual sales. Test coverage includes a future-sales perturbation and an exact weekly-baseline alignment check.
+
+## Inventory simulation
+
+Run `python inventory.py` after the forecast comparison. Outputs are written to `outputs/inventory`. The simulator treats historical sales as a demand proxy. Each series starts on day 1886 with 14 days of assumed stock at its trailing sales rate and zero inbound units. A 28-day warm-up precedes the scored replay on days 1914?1941. Receipts arrive before the weekly review. Orders use sales observed through the previous day. Unfilled units are lost. Lead times are constant, deliveries arrive in full, and orders are rounded up to whole units.
+
+The fixed policy targets 14 days of cover. The forecast policy targets the seven-day review interval plus supplier lead time, with zero or three additional days of buffer. Both subtract on-hand and outstanding units. At seven-day lead time, the unbuffered policies are mathematically identical. Scenario cost is expressed in illustrative points: 0.02 per closing-stock unit per day plus 1 per lost unit. Holding costs, supplier constraints and unavailable demand during historical stockouts are uncertain.
+
+| Lead days | Policy | Buffer days | Simulated fill rate | Average closing units across cohort | Cost points |
+|---:|---|---:|---:|---:|---:|
+| 7 | Fixed / forecast | 0 | 71.35% | 735.61 | 1493.94 |
+| 7 | Forecast | 3 | 78.42% | 1073.21 | 1416.00 |
+| 14 | Fixed | 0 | 54.06% | 509.57 | 2020.36 |
+| 14 | Forecast | 0 | 69.90% | 983.29 | 1687.64 |
+| 14 | Forecast | 3 | 74.16% | 1282.93 | 1694.44 |
+
+The next-order export records a counterfactual review on day 1942. Filter to one scenario before summing suggested units. Each row gives the trailing mean, target, assumed on-hand stock, open orders and suggested quantity. No purchasing transactions are executed.
 
 ## Setup on Windows
 
