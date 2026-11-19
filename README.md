@@ -2,6 +2,10 @@
 
 Retail demand forecasting, inventory intelligence and replenishment analysis.
 
+## Planner AI experiment
+
+[Demand uncertainty and local planner assistant](PLANNER.md) adds a quantile forecasting experiment, an evidence-backed agent and a risk-ranked Power BI queue.
+
 ## Current milestone
 
 Harish verified all four pages in Power BI Desktop. Phase 7 reproduced the pipeline and report project from the pinned GitHub source. Start with the [three-minute interview walkthrough and clean setup](PHASE7.md). See [cohort preparation](PHASE2.md) and the [Desktop verification guide](powerbi/PHASE6.md).
@@ -127,3 +131,4 @@ across multiple files, so a failed write can leave a partial new run directory.
 Only a completed command with a manifest should be treated as a successful run.
 Dependency pins describe the tested environment, without constituting a security
 or license audit of every transitive dependency.
+
